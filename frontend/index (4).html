@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    <title>SHAF Visitor Counter</title>
+    
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="https://shaf.org.uk/wp-content/uploads/2022/05/Logo_fulltransparency.png">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        button {
+            touch-action: manipulation;
+        }
+        .no-select {
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
+        /* Custom styled background container specifically for the main button */
+        .shaf-button-bg {
+            background-image: url('https://shaf.org.uk/wp-content/uploads/2022/05/Logo_fulltransparency.png');
+            background-size: 80% 80%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col justify-between font-sans no-select">
+
+    <header class="p-4 bg-white border-b border-gray-200 flex justify-between items-center shrink-0 shadow-md">
+        <div class="flex items-center space-x-3">
+            <div id="logoWrapper" class="p-1 rounded-lg" oncontextmenu="return false;">
+    <img id="shafPwaLogo" 
+         src="https://shaf.org.uk/wp-content/uploads/2022/05/Logo_fulltransparency.png" 
+         class="w-10 h-10 object-contain cursor-pointer" 
+         style="pointer-events: auto !important; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;"
+         alt="SHAF Logo" 
+         draggable="false">
+</div>
+            </div>
+            <div class="flex flex-col text-left">
+                <span class="font-black text-base leading-tight text-gray-900">SHAF Visitor Counter</span>
+                <span id="exhibitionSubhead" class="text-xs font-bold text-indigo-600 tracking-wide uppercase"></span>
+            </div>
+        </div>
+        <div id="statusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-green-600 text-white">
+            <span id="statusText">Online</span>
+        </div>
+    </header>
+
+    <main class="flex-1 flex flex-col justify-center items-center px-6 py-4 space-y-8 w-full max-w-md mx-auto">
+        <div class="grid grid-cols-2 gap-4 w-full">
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-4 text-center shadow-lg">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Daily Total</p>
+                <p id="dailyTotal" class="text-4xl font-extrabold text-white mt-1">0</p>
+            </div>
+            <div class="bg-gray-800 border border-gray-700 rounded-2xl p-4 text-center shadow-lg">
+                <p class="text-xs font-semibold uppercase tracking-wider text-gray-400">Exhibition Total</p>
+                <p id="grandTotal" class="text-4xl font-extrabold text-indigo-400 mt-1">0</p>
+            </div>
+        </div>
+
+        <div class="w-full flex-1 flex items-center justify-center">
+            <button id="counterBtn" class="shaf-button-bg w-64 h-64 sm:w-72 sm:h-72 active:scale-95 transition-all duration-100 rounded-full flex flex-col justify-center items-center shadow-2xl border-8 border-indigo-950 overflow-hidden relative group">
+                
+                <div id="overlayVeil" class="absolute inset-0 bg-indigo-950/40 group-hover:bg-indigo-950/30 group-active:bg-emerald-900/60 transition-colors duration-100 flex flex-col justify-center items-center pointer-events-none">
+                    
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 text-white drop-shadow-[0_4px_6px_rgba(0,0,0,0.6)] group-active:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                    
+                    <span class="text-white text-xl font-black uppercase tracking-widest mt-2 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                        Visitor
+                    </span>
+                    
+                </div>
+            </button>
+        </div>
+
+        <div id="syncAlert" class="text-center text-xs text-gray-500 h-4">
+            System ready.
+        </div>
+    </main>
+
+    <div id="controlModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-gray-800 border border-gray-700 rounded-2xl max-w-sm w-full p-6 text-center shadow-2xl">
+            <div class="w-12 h-12 rounded-full bg-indigo-950/50 border border-indigo-500/30 flex items-center justify-center mx-auto mb-3 text-indigo-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                </svg>
+            </div>
+            <h3 class="text-base font-bold text-white mb-1">Testing Controls</h3>
+            <p class="text-xs text-gray-400 mb-4">Manage display tracking rules for this local device view.</p>
+            
+            <div class="text-left mb-4">
+                <label for="exhibitionInput" class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Target Exhibition Title</label>
+                <input type="text" id="exhibitionInput" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 font-sans" placeholder="e.g. Creative Passions 26">
+            </div>
+
+            <div class="flex flex-col space-y-2">
+                <button id="clearDailyBtn" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 px-4 rounded-xl text-xs transition-colors">Reset Daily Total Only</button>
+                <button id="clearBothBtn" class="w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors">Reset Both & Apply Title</button>
+                <button id="closeModalBtn" class="w-full bg-transparent text-gray-400 hover:text-white text-xs font-semibold py-2 mt-1">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="p-4 text-center text-xs text-gray-600 border-t border-gray-800 shrink-0">
+        CP26 Event Tracking Pipeline v1.4
+    </footer>
+
+    <script>
+        let EXHIBITION_TITLE = localStorage.getItem('shaf_active_exhibition') || "Creative Passions 26";
+        document.getElementById('exhibitionSubhead').innerText = EXHIBITION_TITLE;
+        document.getElementById('exhibitionInput').value = EXHIBITION_TITLE;
+
+        const firebaseConfig = {
+            apiKey: 'AIzaSyDr4JxsAawQy3Fw5nd8-OH-fhrvQ7LoP6M',
+            authDomain: 'shaf-payment-system.firebaseapp.com',
+            projectId: 'shaf-payment-system',
+            storageBucket: 'Transactions',
+            messagingSenderId: '531379594614',
+            appId: '1:531379594614:web:cb453d19d6087d76aa4657YOUR_APP_ID'
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+
+        const counterBtn = document.getElementById('counterBtn');
+        const overlayVeil = document.getElementById('overlayVeil');
+        const dailyTotalEl = document.getElementById('dailyTotal');
+        const grandTotalEl = document.getElementById('grandTotal');
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('statusText');
+        const syncAlert = document.getElementById('syncAlert');
+        const logoTarget = document.getElementById('shafPwaLogo');
+        
+        const controlModal = document.getElementById('controlModal');
+        const exhibitionInput = document.getElementById('exhibitionInput');
+        const clearDailyBtn = document.getElementById('clearDailyBtn');
+        const clearBothBtn = document.getElementById('clearBothBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        counterBtn.addEventListener('click', async () => {
+            if (navigator.vibrate) navigator.vibrate(40);
+            flashButtonFeedback();
+
+            const visitorPayload = {
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                clientTime: new Date().toISOString(),
+                dateString: getLocalDateString(new Date()),
+                exhibition: EXHIBITION_TITLE
+            };
+
+            try {
+                await db.collection('CP26_Visitors').add(visitorPayload);
+            } catch (error) {
+                console.error("Write error: ", error);
+            }
+        });
+
+        db.collection('CP26_Visitors').onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
+            const todayStr = getLocalDateString(new Date());
+            const dailyResetBarrier = parseInt(localStorage.getItem('shaf_daily_reset_time') || '0');
+            const globalResetBarrier = parseInt(localStorage.getItem('shaf_global_reset_time') || '0');
+            
+            let dailyCount = 0;
+            let totalCount = 0;
+
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                const recordTimestamp = data.clientTime ? new Date(data.clientTime).getTime() : 0;
+                
+                if (recordTimestamp > globalResetBarrier) {
+                    totalCount++;
+                    if (data.dateString === todayStr && recordTimestamp > dailyResetBarrier) {
+                        dailyCount++;
+                    }
+                }
+            });
+
+            dailyTotalEl.innerText = dailyCount;
+            grandTotalEl.innerText = totalCount;
+
+            if (snapshot.metadata.hasPendingWrites) {
+                syncAlert.innerText = "Saved locally. Syncing on signal...";
+                syncAlert.className = "text-center text-xs text-amber-400";
+            } else {
+                syncAlert.innerText = "All records securely synced.";
+                syncAlert.className = "text-center text-xs text-gray-500";
+            }
+        });
+
+// 1. Desktop Keyboard Shortcut (Kept exactly as you had it)
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
+                e.preventDefault(); 
+                e.stopPropagation();
+                openAdminMenu();
+            }
+        }, true);
+
+// 2. Hidden Multi-Tap Engine (Safe for Installed PWAs & Desktop)
+        let tapCount = 0;
+        let tapTimer;
+
+        logoTarget.addEventListener('click', (e) => {
+            tapCount++;
+            
+            // Clear any previous timer window
+            clearTimeout(tapTimer);
+            
+            if (tapCount === 3) {
+                // Success! Three quick taps/clicks opens the vault
+                tapCount = 0;
+                openAdminMenu();
+            } else {
+                // If they don't tap again within 400ms, reset the counter
+                tapTimer = setTimeout(() => {
+                    tapCount = 0;
+                }, 400);
+            }
+        });
+
+        // Shared function to trigger your admin setup cleanly
+        function openAdminMenu() {
+            if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+            exhibitionInput.value = EXHIBITION_TITLE;
+            controlModal.classList.remove('hidden');
+        }
+
+        // 3. Reset Button Action (Kept exactly as you had it)
+        clearDailyBtn.addEventListener('click', () => {
+            localStorage.setItem('shaf_daily_reset_time', Date.now().toString());
+            dailyTotalEl.innerText = "0";
+            controlModal.classList.add('hidden');
+            triggerToast("Daily total counter reset.");
+        });
+
+        clearBothBtn.addEventListener('click', () => {
+            const typedName = exhibitionInput.value.trim();
+            if (typedName === "") {
+                alert("Please enter a valid exhibition name to execute a full layout wipe.");
+                return;
+            }
+
+            const rightNow = Date.now().toString();
+            localStorage.setItem('shaf_daily_reset_time', rightNow);
+            localStorage.setItem('shaf_global_reset_time', rightNow);
+            localStorage.setItem('shaf_active_exhibition', typedName);
+            
+            EXHIBITION_TITLE = typedName;
+            document.getElementById('exhibitionSubhead').innerText = typedName;
+            
+            dailyTotalEl.innerText = "0";
+            grandTotalEl.innerText = "0";
+            controlModal.classList.add('hidden');
+            triggerToast(`Reset complete. Target: ${typedName}`);
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            controlModal.classList.add('hidden');
+        });
+
+        function getLocalDateString(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function triggerToast(msg) {
+            syncAlert.innerText = msg;
+            syncAlert.className = "text-center text-xs text-green-400 font-bold";
+            setTimeout(() => {
+                syncAlert.className = "text-center text-xs text-gray-500";
+                syncAlert.innerText = "System ready.";
+            }, 3000);
+        }
+
+        function flashButtonFeedback() {
+            // Momentarily shifts the visual layer color palette to confirm success to the steward
+            overlayVeil.classList.remove('bg-indigo-950/40');
+            overlayVeil.classList.add('bg-emerald-800/70');
+            setTimeout(() => {
+                overlayVeil.classList.remove('bg-emerald-800/70');
+                overlayVeil.classList.add('bg-indigo-950/40');
+            }, 100);
+        }
+
+        function updateNetworkStatus() {
+            if (navigator.onLine) {
+                statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-green-600 text-white";
+                statusText.innerText = "Online";
+            } else {
+                statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-amber-600 text-white animate-pulse";
+                statusText.innerText = "Offline Mode";
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+        updateNetworkStatus();
+    </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('Service Worker Registered'));
+  }
+</script>
+</body>
+</html>
