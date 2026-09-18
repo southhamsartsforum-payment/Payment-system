@@ -1,0 +1,67 @@
+<div id="artist-dashboard" style="max-width: 800px; margin: 0 auto; font-family: sans-serif;">
+    <h2>Your Artwork Catalog</h2>
+    <p>On this page you can register details of your artworks which may be for sale at one of the SHAF exhibitions - Creative Passions, Present Maker, or at the Arts Trail (Market Hall).  Enter details and click save.  If you return to this page you can edit or delete each artwork, and add more.   Artworks registered here will be displayed as a "pick list" in the SHAF payment system for ease of purchase.  When completing the form tick the target exhibitions.  Also if the availability is limited click limited, and specify the number available.  So, for a single original click limited - 1.  For 10 prints click limited - 10.  Don't click limited if there is no limit, eg greetings cards.  The SHAF Payment system will decrement the number each time one is sold, and if all have been sold will flag the item as sold out.</p>
+    <button id="show-add-form-btn" style="background: #0073aa; color: #fff; padding: 10px 15px; border: none; cursor: pointer; margin-bottom: 20px;">
+        + Add New Artwork
+    </button>
+
+    <div id="artwork-form-container" style="display: none; background: #f9f9f9; padding: 20px; border: 1px solid #ddd; margin-bottom: 20px;">
+        <h3 id="form-title-heading">Add New Artwork</h3>
+        <form id="artwork-submission-form">
+            <!-- Hidden field to hold the Stock Number / Doc ID during edits -->
+            <input type="hidden" id="art-stock-number" value="">
+            
+            <p>
+                <label for="art-title"><strong>Artwork Title:</strong></label><br>
+                <input type="text" id="art-title" name="art-title" required="" style="width: 100%; padding: 8px;">
+            </p>
+            
+            <p>
+                <label for="art-price"><strong>Price (£):</strong></label><br>
+                <input type="number" id="art-price" name="art-price" step="0.01" required="" style="width: 100%; padding: 8px;">
+            </p>
+
+            <p>
+                <label for="art-media"><strong>Media / Description:</strong></label><br>
+                <input type="text" id="art-media" name="art-media" required="" style="width: 100%; padding: 8px;">
+            </p>
+
+            <!-- Limited Edition Toggle -->
+            <p style="background: #eee; padding: 10px; border-radius: 4px;">
+                <label style="cursor: pointer;">
+                    <input type="checkbox" id="art-is-limited" style="transform: scale(1.2); margin-right: 8px;">
+                    <strong>Limited Edition / Quantity Series?</strong>
+                </label>
+            </p>
+
+            <!-- Number Available (conditionally shown if Limited is checked) -->
+            <p id="number-available-group" style="display: none; padding-left: 15px; border-left: 3px solid #0073aa;">
+                <label for="art-number-available"><strong>Number Available:</strong> (Enter 0 if sold out)</label><br>
+                <input type="number" id="art-number-available" name="art-number-available" min="0" value="1" style="width: 100px; padding: 8px;">
+            </p>
+
+            <!-- Exhibitions Checkboxes -->
+            <p>
+                <strong>Target Exhibitions:</strong><br>
+                <label style="margin-right: 15px; display: inline-block; margin-top: 5px;">
+                    <input type="checkbox" name="exhibitions" value="Creative Passions"> Creative Passions
+                </label>
+                <label style="margin-right: 15px; display: inline-block; margin-top: 5px;">
+                    <input type="checkbox" name="exhibitions" value="Present Maker"> Present Maker
+                </label>
+                <label style="margin-right: 15px; display: inline-block; margin-top: 5px;">
+                    <input type="checkbox" name="exhibitions" value="Arts Trail"> Arts Trail
+                </label>
+            </p>
+
+            <p style="margin-top: 20px;">
+                <button type="submit" id="submit-artwork-btn" style="background: #0073aa; color: #fff; padding: 8px 15px; border: none; cursor: pointer;">Submit</button>
+                <button type="button" id="cancel-btn" style="background: #ccc; color: #333; padding: 8px 15px; border: none; cursor: pointer; margin-left: 10px;">Cancel</button>
+            </p>
+        </form>
+    </div>
+
+    <div id="artwork-list-container">
+        <p>Loading your artworks...</p>
+    </div>
+</div>

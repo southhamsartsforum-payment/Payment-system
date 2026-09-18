@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f3f4f6">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="https://shaf.org.uk/wp-content/uploads/2022/05/Logo_fulltransparency.png">
+    <title>SHAF Sales SumUp V10.2</title>
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+        }
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    overflow-y: auto;
+}
+        .modal-overlay.hidden {
+            display: none !important;
+        }
+.modal-content {
+    background-color: #fff;
+    padding: 24px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    margin: 20px 0;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+        .tablet-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 1.125rem;
+            font-weight: 500;
+            height: 56px;
+            background-color: #f8fafc;
+            transition: all 0.2s;
+            color: #1e293b;
+        }
+        .tablet-input:focus {
+            border-color: #3b82f6;
+            background-color: #fff;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+        .button {
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .btn-blue {
+            background-color: #3b82f6;
+            color: #fff;
+        }
+        .btn-blue:hover {
+            background-color: #2563eb;
+        }
+        .btn-green {
+            background-color: #10b981;
+            color: #fff;
+        }
+        .btn-green:hover {
+            background-color: #059669;
+        }
+        .btn-red {
+            background-color: #ef4444;
+            color: #fff;
+        }
+        .btn-red:hover {
+            background-color: #dc2626;
+        }
+        .btn-pay {
+            padding: 16px 24px;
+            font-size: 1.25rem;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .card {
+            background-color: #fff;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            flex-direction: column;
+            height: calc(100vh - 200px);
+            max-height: 80vh;
+            display: none;
+        }
+        .scrollable-content {
+            flex-grow: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+        #salesTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        #salesTable th,
+        #salesTable td {
+            text-align: left;
+        }
+        #salesTable th {
+            background-color: #f8fafc;
+            font-weight: 700;
+            font-size: 1.25rem;
+            padding: 18px 16px;
+            color: #1e293b;
+            border-bottom: 3px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        #salesTable td {
+            padding: 22px 16px;
+            font-size: 1.15rem;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        #salesTable tbody tr:hover {
+            background-color: #f3f4f6;
+        }
+        .bg-success {
+            background-color: #d1fae5 !important;
+            transition: background-color 0.5s ease;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            border-left-color: #fff;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        .offline-badge {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #f59e0b;
+        }
+        .offline-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #f59e0b;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        .online-badge {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #10b981;
+        }
+        .online-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #10b981;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js">
+    </script>
+    <script src="javascript.js">
+    </script>
+</head>
+<body>
+    <div class="flex flex-col h-[100dvh] max-w-7xl mx-auto w-full p-2 space-y-4 overflow-hidden">
+
+        <header class="bg-white shadow border-b border-gray-200 px-6 py-4 rounded-xl flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-4 select-none">
+                <img src="https://shaf.org.uk/wp-content/uploads/2022/05/Logo_fulltransparency.png" alt="SHAF Logo" id="shafLogo" class="h-16 w-auto object-contain cursor-pointer select-none" draggable="false">
+                <h1 id="appMainTitle" class="text-2xl font-black text-gray-900 tracking-tight">SHAF Sales Dashboard</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div id="connectionStatus" class="online-badge">
+                    <span class="dot"></span>
+                    <span id="connectionStatusText">Online</span>
+                </div>
+                <div id="statusMessage" class="text-base md:text-lg text-right text-gray-600 font-bold max-w-md bg-gray-50 px-4 py-2 rounded-lg border border-gray-100">Initializing...</div>
+            </div>
+        </header>
+
+        <div class="flex gap-4 justify-between items-center bg-white p-4 rounded-xl shadow border border-gray-100 flex-shrink-0">
+            <div class="flex space-x-3">
+                <button id="showBasketBtn" class="px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-base shadow transition-all active:scale-95">Basket</button>
+                <button id="showTransactionsBtn" class="px-6 py-3.5 bg-gray-400 text-white font-bold rounded-lg text-base shadow transition-all active:scale-95">Transaction History</button>
+            </div>
+            <div class="flex space-x-3">
+                <button id="clearBasketBtn" class="px-6 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg text-base shadow transition-all active:scale-95">Clear Basket</button>
+                <button id="showSaleModalBtn" class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-lg text-base shadow transition-all active:scale-95 border-b-4 border-emerald-800">+ Add New Item</button>
+            </div>
+        </div>
+
+        <div class="w-full flex-1 flex flex-col min-h-0">
+            <div id="basketPanel" class="card w-full pb-2 flex flex-col flex-1 min-h-0">
+                <div class="flex justify-between items-center mb-6 bg-slate-50 p-4 rounded-xl border border-gray-100 flex-shrink-0">
+                    <h2 class="text-2xl font-black text-gray-900">Basket</h2>
+                    <div class="text-xl md:text-2xl font-black text-gray-800">
+                        Items: <span id="itemCount" class="text-blue-600">0</span> |
+                        Total Due: <span id="basketTotal" class="text-emerald-600 bg-emerald-50 px-4 py-1.5 rounded-lg border border-emerald-200">£0.00</span>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col min-h-0 space-y-4">
+                    <div class="w-full flex-1 overflow-y-auto border border-gray-100 rounded-lg bg-white">
+                        <table id="salesTable" class="w-full table-fixed">
+                            <thead>
+                                <tr>
+                                    <th class="w-1/4">Artist</th>
+                                    <th class="w-[40%] max-w-[400px] whitespace-normal break-words">Title</th>
+                                    <th class="w-12 text-center">Qty</th>
+                                    <th class="w-20">Price</th>
+                                    <th class="w-24">Total</th>
+                                    <th class="w-16 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="salesTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="mt-2 pt-2 border-t border-gray-200 text-right flex-shrink-0">
+                        <button id="showPrintReceiptModalBtn" class="px-10 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-xl shadow-lg transition-all active:scale-95 border-b-4 border-emerald-800 w-full sm:w-auto">Proceed to Checkout</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="transactionsPanel" class="card w-full pb-6">
+                <div class="flex justify-between items-center mb-6 bg-slate-50 p-4 rounded-xl border border-gray-100 flex-shrink-0">
+                    <h2 class="text-2xl font-black text-gray-900">Logged Transaction Ledger</h2>
+                    <div class="text-base font-bold text-gray-500">Historical Device Archive Logs</div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-xl border border-gray-200/60 shadow-inner mb-6 flex-shrink-0">
+                    <div class="grid grid-cols-4 gap-4 text-base text-gray-600 font-bold mb-2 border-b border-gray-300 pb-2">
+                        <div class="col-span-1 text-left uppercase tracking-wider">Accounting Period</div>
+                        <div class="text-center uppercase tracking-wider">Cash Receipts</div>
+                        <div class="text-center uppercase tracking-wider">Card Processing</div>
+                        <div class="text-center uppercase tracking-wider">Gross Total</div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 py-3 border-b border-gray-200 items-center">
+                        <div class="col-span-1 text-left font-black text-gray-900 text-lg">Today's Sales</div>
+                        <div id="cashTotalTodayDisplay" class="text-center font-bold text-gray-800 text-xl">£0.00</div>
+                        <div id="cardTotalTodayDisplay" class="text-center font-bold text-gray-800 text-xl">£0.00</div>
+                        <div id="overallTotalTodayDisplay" class="text-center font-black text-2xl text-blue-600">£0.00</div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-4 py-3 pt-4 items-center">
+                        <div class="col-span-1 text-left font-black text-gray-500 text-lg">All Device Total</div>
+                        <div id="cashTotalAllDisplay" class="text-center font-bold text-gray-500 text-xl">£0.00</div>
+                        <div id="cardTotalAllDisplay" class="text-center font-bold text-gray-500 text-xl">£0.00</div>
+                        <div id="overallTotalAllDisplay" class="text-center font-black text-2xl text-gray-500">£0.00</div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-4 pt-4 border-t border-gray-200 flex-shrink-0">Individual Transaction Log</h3>
+                <div id="completedTransactionsList" class="scrollable-content space-y-3 pr-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALS -->
+    <div id="artistPickerModal" class="modal-overlay hidden fixed inset-0 z-[100] bg-white p-4">
+        <div class="flex flex-col h-full">
+            <h3 class="text-2xl font-black text-gray-900 mb-4">Select Artist</h3>
+            <div id="artistGrid" class="flex-grow grid grid-cols-2 gap-3 overflow-y-auto pb-4"></div>
+            <button type="button" onclick="closeModal('artistPickerModal')" class="w-full py-4 bg-gray-500 text-white font-bold rounded-xl mt-4">Close</button>
+        </div>
+    </div>
+
+    <div id="newSaleModal" class="modal-overlay hidden z-[50]">
+        <div class="bg-white p-8 rounded-2xl w-[95%] max-w-xl shadow-2xl border border-gray-100 self-start mt-2">
+            <h3 class="text-2xl font-black text-gray-900 mb-6 border-b border-gray-100 pb-3">Add Item for <span id="displayArtistName" class="text-emerald-600"></span></h3>
+            <form id="newSaleForm">
+                <div class="space-y-6">
+                    <div>
+                        <label for="title" class="block text-base font-bold text-gray-700 mb-2">Item Title</label>
+                        <input type="text" id="title" class="tablet-input" placeholder="Stock code or description" maxlength="40" required>
+                        <input type="hidden" id="artist">
+                        <input type="hidden" id="stockNumber">
+                        <input type="hidden" id="isLimited">
+                        <input type="hidden" id="maxAvailableStock" value="">
+                    </div>
+                    <div class="flex space-x-6">
+                        <div class="w-1/2">
+                            <label for="quantity" class="block text-base font-bold text-gray-700 mb-2">Quantity</label>
+                            <div class="flex items-center space-x-1 h-14">
+                                <button type="button" id="decQtyBtn" class="w-14 h-full bg-red-100 text-red-700 hover:bg-red-200 active:scale-95 transition-all text-2xl font-black rounded-l-lg border border-red-200 select-none">-</button>
+                                <input type="number" id="quantity" class="w-16 h-full text-center text-xl font-bold bg-slate-50 border-y border-slate-300 focus:outline-none focus:ring-0" min="1" value="1" required readonly>
+                                <button type="button" id="incQtyBtn" class="w-14 h-full bg-emerald-100 text-emerald-700 hover:bg-emerald-200 active:scale-95 transition-all text-2xl font-black rounded-r-lg border border-emerald-200 select-none">+</button>
+                            </div>
+                        </div>
+                        <div class="w-1/2">
+                            <label for="price" class="block text-base font-bold text-gray-700 mb-2">Price (£)</label>
+                            <input type="number" id="price" class="tablet-input" step="0.01" placeholder="0.00" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-8 flex justify-end space-x-4 border-t border-gray-100 pt-5">
+                    <button type="button" id="cancelSaleBtn" class="px-8 py-4 bg-gray-500 hover:bg-gray-600 text-white font-bold rounded-xl text-base shadow transition-colors">Cancel</button>
+                    <button type="submit" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-xl text-base shadow border-b-4 border-emerald-800 transition-all active:scale-95">Add to Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="itemPickerModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[100]">
+        <div class="bg-white p-8 rounded-2xl w-[95%] max-w-lg shadow-2xl">
+            <h3 class="text-xl font-black text-gray-900 mb-4">Select an Item</h3>
+            <div id="pickerGrid" class="grid grid-cols-1 gap-2 max-h-[60vh] overflow-y-auto"></div>
+            <button onclick="window.closePicker()" class="mt-6 w-full bg-gray-100 py-3 rounded-lg font-bold hover:bg-gray-200 transition-colors z-[100]">Cancel</button>
+        </div>
+    </div>
+
+    <div id="printReceiptModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4">Complete Sale</h3>
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <span class="font-medium">Total:</span>
+                    <span id="receiptTotal" class="font-bold text-xl text-indigo-600">£0.00</span>
+                </div>
+                <p class="text-center mt-4 font-medium text-gray-700">Select Payment Method</p>
+                <div class="flex justify-center space-x-4">
+                    <button id="cashBtn" class="button btn-green btn-pay w-28">Cash</button>
+                    <button id="cardBtn" class="button btn-blue btn-pay w-28">Card</button>
+                </div>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="cancelPrintBtn" class="button bg-gray-500 text-white">Go Back</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sumupOverlayModal" class="modal-overlay hidden !bg-slate-900/90 z-[200]">
+        <div class="m-auto text-center p-8 bg-slate-800 border border-slate-700 rounded-2xl max-w-sm w-[90%] text-white shadow-2xl">
+            <div class="flex justify-center mb-6">
+                <div class="spinner"></div>
+            </div>
+            <h3 class="text-2xl font-black mb-2 tracking-tight">SumUp Terminal Active</h3>
+            <p id="sumupOverlayMessage" class="text-sm text-slate-300 font-medium mb-6 leading-relaxed">Pushing charge details to your physical device. Tap or insert card to complete balance checkout.</p>
+            <div class="border-t border-slate-700 pt-4">
+                <button id="cancelSumUpBtn" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 font-bold rounded-lg text-sm transition-colors shadow">Bypass / Abort Charge</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 id="confirmationTitle" class="text-xl font-semibold mb-4">Confirm Payment</h3>
+            <p id="confirmationMessage" class="text-sm text-gray-700 mb-6"></p>
+            <div class="flex justify-end space-x-4">
+                <button id="cancelConfirmationBtn" type="button" class="button bg-gray-500 text-white">Go Back</button>
+                <button id="confirmPaymentBtn" type="button" class="button btn-green">Confirm Payment</button>
+                <button id="confirmReceiptBtn" type="button" class="button btn-green">Confirm with Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="successModal" class="modal-overlay hidden">
+        <div class="modal-content text-center">
+            <h3 class="text-xl font-bold mb-2 text-emerald-600">Payment Complete</h3>
+            <p id="successMessage" class="text-sm text-gray-700 mb-6">Transaction recorded successfully.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="successFinishedBtn" class="button btn-blue">Finished</button>
+                <button id="successReceiptBtn" class="button btn-green">Send Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="emailEntryModal" class="modal-overlay hidden" style="z-index:100;">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4">Email Receipt</h3>
+            <p class="text-sm text-gray-600 mb-4">Enter the customer's email address to send the receipt.</p>
+            <input type="email" id="customerEmail" class="tablet-input mb-4" placeholder="customer@example.com">
+            <div class="flex justify-end space-x-4">
+                <button id="cancelEmailBtn" class="button bg-gray-500 text-white">Cancel</button>
+                <button id="sendEmailBtn" class="button btn-green">Send Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="adminModal" class="modal-overlay hidden">
+        <div class="modal-content max-w-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-red-600">Admin Controls</h3>
+                <button type="button" id="closeAdminXBtn" class="text-gray-400 hover:text-gray-600 text-2xl font-black leading-none">&times;</button>
+            </div>
+            <div class="space-y-6">
+                <form id="adminPasswordForm" onsubmit="return false;">
+                    <label for="resetPassword" class="block text-sm font-medium mb-1">Verify Admin Password</label>
+                    <input type="password" id="resetPassword" class="tablet-input !h-12 !text-base" placeholder="Enter password" autocomplete="new-password" required>
+                </form>
+
+                <div class="border-t pt-4">
+                    <h4 class="text-base font-semibold mb-2 text-gray-800">Exhibition Settings</h4>
+                    <label for="exhibitionSelect" class="block text-xs font-bold text-gray-600 mb-1">ACTIVE EXHIBITION</label>
+                    <select id="exhibitionSelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 focus:outline-none mb-3">
+                        <option value="">All Exhibitions (No Filter)</option>
+                    </select>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h4 class="text-base font-semibold mb-2 text-gray-800">Hardware Terminal Integration</h4>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-xs font-bold text-slate-700 uppercase">SumUp Solo Terminal Mode</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="sumupToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                        <div class="border-t border-slate-200 mt-4 pt-4">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase mb-3">Pair New Reader</h4>
+                            <div class="space-y-2">
+                                <input type="text" id="pairingCodeInput" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 focus:outline-none" placeholder="Enter Pairing Code (e.g. 4WLFDSBF)">
+                                <input type="text" id="readerNameInput" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-slate-50 focus:outline-none" placeholder="Reader Name (e.g. Frontdesk)">
+                                <button id="pairReaderBtn" class="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition-colors">Pair Reader</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="sumupEmailInput" class="block text-xs font-bold text-gray-600 mb-1">MERCHANT ACCOUNT EMAIL</label>
+                            <input type="email" id="sumupEmailInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-slate-50 focus:outline-none" placeholder="shaf-merchant@email.com">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h4 class="text-base font-semibold mb-2 text-gray-800">Clear Device Memory</h4>
+                    <p class="text-xs text-gray-500 mb-3">Wipes offline log values cached in local storage.</p>
+                    <div class="flex justify-end space-x-2">
+                        <button id="cancelResetBtn" type="button" class="button bg-gray-500 text-white text-sm">Close</button>
+                        <button id="confirmResetBtn" type="button" class="button btn-red text-sm">Reset Transactions</button>
+                    </div>
+                </div>
+
+                <div class="border-t pt-4">
+                    <h4 class="text-base font-semibold mb-2 text-gray-800">Manage Core Artist List</h4>
+                    <textarea id="artistListTextarea" class="w-full h-24 text-xs tablet-input resize-none" placeholder="One name per line"></textarea>
+                    <div id="artistStatus" class="text-xs mt-1 text-gray-500"></div>
+                    <div class="flex justify-end mt-3">
+                        <button id="saveArtistsBtn" type="button" class="button btn-blue text-sm">Push Artist List</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
