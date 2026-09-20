@@ -1,0 +1,45 @@
+name: Deploy to Firebase Hosting on Merge
+on:
+  push:
+    branches:
+      - Visitors
+
+concurrency:
+  group: firebase-deploy-live
+  cancel-in-progress: true
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      # Deploy the Sales App
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SHAF_PAYMENT_SYSTEM }}
+          projectId: shaf-payment-system
+          target: shafsales
+          channelId: live
+          public: visitors/version_81
+
+      # Deploy the Counter App
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SHAF_PAYMENT_SYSTEM }}
+          projectId: shaf-payment-system
+          target: shafcounter
+          channelId: live
+          public: visitors/counter
+
+      # Deploy the Development App
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SHAF_PAYMENT_SYSTEM }}
+          projectId: shaf-payment-system
+          target: shafdevelopment
+          channelId: live
+          public: visitors/version_9
