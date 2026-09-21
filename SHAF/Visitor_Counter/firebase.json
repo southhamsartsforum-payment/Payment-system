@@ -1,20 +1,6 @@
 {
   "hosting": [
-    {
-      "target": "shafsales",
-      "public": "Payment",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    },
+    
     {
       "target": "shafcounter",
       "public": "firebase-public",
@@ -30,22 +16,7 @@
         }
       ]
     },
-    {
-      "target": "shafdevelopment",
-      "public": "version_9",
-      "ignore": [
-        "firebase.json",
-        "**/.*",
-        "**/node_modules/**"
-      ],
-      "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
-      ]
-    }
-  ],
+    
   "functions": [
     {
       "source": "functions",
