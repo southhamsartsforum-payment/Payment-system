@@ -1,11 +1,12 @@
-name: Deploy to Firebase Hosting on Merge
+name: Deploy Visitor Counter to Firebase Hosting
+
 on:
   push:
     branches:
       - Visitors
 
 concurrency:
-  group: firebase-deploy-live
+  group: firebase-deploy-visitor
   cancel-in-progress: true
 
 jobs:
@@ -13,18 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      # Deploy the Sales App
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SHAF_PAYMENT_SYSTEM }}
-          projectId: shaf-payment-system
-          target: shafsales
-          channelId: live
-          public: visitors/version_81
 
-      # Deploy the Counter App
+      # Deploy ONLY the Counter App
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
@@ -32,14 +23,4 @@ jobs:
           projectId: shaf-payment-system
           target: shafcounter
           channelId: live
-          public: visitors/counter
-
-      # Deploy the Development App
-      - uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SHAF_PAYMENT_SYSTEM }}
-          projectId: shaf-payment-system
-          target: shafdevelopment
-          channelId: live
-          public: visitors/version_9
+          entryPoint: ./Visitor_Counter
