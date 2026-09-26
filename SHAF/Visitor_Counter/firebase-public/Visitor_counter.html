@@ -126,8 +126,8 @@
         document.getElementById('exhibitionInput').value = EXHIBITION_TITLE;
 
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+// import { initializeApp } from "firebase/app";
+// import { getAnalytics } from "firebase/analytics";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -178,13 +178,13 @@ const analytics = getAnalytics(app);
             };
 
             try {
-                await db.collection('CP26_Visitors').add(visitorPayload);
+                await db.collection('Visitor_Counter').add(visitorPayload);
             } catch (error) {
                 console.error("Write error: ", error);
             }
         });
 
-        db.collection('CP26_Visitors').onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
+        db.collection('Visitor_Counter').onSnapshot({ includeMetadataChanges: true }, (snapshot) => {
             const todayStr = getLocalDateString(new Date());
             const dailyResetBarrier = parseInt(localStorage.getItem('shaf_daily_reset_time') || '0');
             const globalResetBarrier = parseInt(localStorage.getItem('shaf_global_reset_time') || '0');
