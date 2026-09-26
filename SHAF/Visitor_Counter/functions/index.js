@@ -7,7 +7,14 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const {setGlobalOptions} = require("firebase-functions");
+// const {setGlobalOptions} = require("firebase-functions"); V2 options
+// Change v2 imports to v1:
+const functions = require("firebase-functions");
+
+// Example v1 HTTP Function
+exports.myFunction = functions.https.onRequest((req, res) => {
+  res.send("Running on Spark plan!");
+});
 // const {onRequest} = require("firebase-functions/https");
 // const logger = require("firebase-functions/logger");
 
