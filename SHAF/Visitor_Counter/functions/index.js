@@ -8,8 +8,8 @@
  */
 
 const {setGlobalOptions} = require("firebase-functions");
-//const {onRequest} = require("firebase-functions/https");
-//const logger = require("firebase-functions/logger");
+// const {onRequest} = require("firebase-functions/https");
+// const logger = require("firebase-functions/logger");
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
