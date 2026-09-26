@@ -1,5 +1,15 @@
 {
   "projects": {
     "default": "shaf-payment-system-489a5"
-  }
+  },
+  "targets": {
+    "shaf-payment-system-489a5": {
+      "hosting": {
+        "shafcounter": [
+          "shaf-payment-system-489a5"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }
