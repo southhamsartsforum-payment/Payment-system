@@ -125,16 +125,29 @@
         document.getElementById('exhibitionSubhead').innerText = EXHIBITION_TITLE;
         document.getElementById('exhibitionInput').value = EXHIBITION_TITLE;
 
-        const firebaseConfig = {
-            apiKey: 'AIzaSyDr4JxsAawQy3Fw5nd8-OH-fhrvQ7LoP6M',
-            authDomain: 'shaf-payment-system.firebaseapp.com',
-            projectId: 'shaf-payment-system',
-            storageBucket: 'Transactions',
-            messagingSenderId: '531379594614',
-            appId: '1:531379594614:web:cb453d19d6087d76aa4657YOUR_APP_ID'
-        };
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-        firebase.initializeApp(firebaseConfig);
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyCxb5U5L-dCGjlxWmshJvE7hK-x1dFoAYc",
+  authDomain: "shaf-payment-system-489a5.firebaseapp.com",
+  projectId: "shaf-payment-system-489a5",
+  storageBucket: "shaf-payment-system-489a5.firebasestorage.app",
+  messagingSenderId: "884489299662",
+  appId: "1:884489299662:web:2d384846bb406b9a16529f",
+  measurementId: "G-SPV9ELRXV1"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+ 
         const db = firebase.firestore();
         db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
 
